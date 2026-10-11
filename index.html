@@ -1,116 +1,161 @@
-<html>
-	<head>
-		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-		<style>
-			h1 {
-				text-align: center;
-			}
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta content="width=device-width,initial-scale=1" name="viewport">
+  <title>
+   CS184 Homework 2 Task 1 - Alex Dils
+  </title>
+  <style>
+   *{box-sizing:border-box}
+body{margin:0;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5}
+.report{max-width:980px;margin:auto;padding:32px}
+.page{background:white;padding:42px 48px;margin:0 0 28px}
+h1{font-size:34px;line-height:1.15;margin:5px 0 10px;color:#000}
+h2{font-size:22px;color:#000;margin:22px 0 9px}
+h3{font-size:19px;color:#000;margin:18px 0 8px}
+p{margin:9px 0 12px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;color:#000;margin:0}
+.author{font-size:18px;margin:0 0 16px}
+.links{font-size:12px;line-height:1.7}
+a{color:#0000ee;overflow-wrap:anywhere}
+code{font-family:Consolas,monospace;font-size:.9em;background:#fff;padding:1px 3px;border-radius:3px}
+.equation{padding:10px 0;margin:12px 0;font-size:14px;line-height:1.65}
+.grid{display:grid;gap:16px;margin:16px 0}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+figure{margin:12px 0;break-inside:avoid}
+figure img{width:100%;height:auto;display:block;border-radius:3px}
+figcaption{font-size:12px;color:#000;line-height:1.4;margin-top:6px}
+.grid figure{margin:0}
+.medium{max-width:580px;margin:auto}
+.small{font-size:12px;line-height:1.5;color:#000}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:16px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #000}
+th{background:#fff}
 
-			.container {
-				margin: 0 auto;
-				padding: 60px 20%;
-			}
+@media(max-width:700px){.report{padding:10px}
+.page{padding:24px}
+.cols-2,.cols-3{grid-template-columns:1fr}
+}
 
-			figure {
-				text-align: center;
-			}
+@page{size:Letter;margin:12mm 13mm}
 
-			img {
-				display: inline-block;
-			}
+@media print{body{background:white;font-size:10.5px;line-height:1.43}
+.report{max-width:none;margin:0;padding:0}
+.page{padding:0;margin:0;box-shadow:none;break-after:page}
+.page:last-child{break-after:auto}
+h1{font-size:24px}
+h2{font-size:16px;margin:14px 0 7px}
+h3{font-size:14px;margin:13px 0 6px}
+p{margin:6px 0 9px}
+.eyebrow{font-size:9px}
+.author{font-size:13px;margin:0 0 9px}
+.links{font-size:8.8px}
+.equation{font-size:10px;padding:7px 10px;margin:9px 0}
+.grid{gap:12px;margin:12px 0}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+figcaption{font-size:9px;margin-top:4px}
+.medium{max-width:400px}
+.medium.curve{max-width:300px}
+.small{font-size:9px}
+table{font-size:10px;margin:10px 0}
+th,td{padding:6px 8px}
+figure{margin:9px 0}
+a{color:#0000ee;text-decoration:underline}
+img{print-color-adjust:exact}
+h2,h3{break-after:avoid}
+}
+  </style>
+  <script defer="" src="assets/mathjax/tex-svg.js">
+  </script>
+ </head>
+ <body>
+  <main class="report">
+   <section class="page">
+    <header>
+     <h1>
+      Homework 2:</h1>
+     <p class="author">
+      Alex Dils
+     </p>
+    </header>
+    <p class="links">
+     Webpage address:
+     <a href="https://cal-cs184-student.github.io/hw2-alexdils-writeup/">
+      cal-cs184-student.github.io/hw2-alexdils-writeup/
+     </a>
+     <br>
+     Code repository:
+     <a href="https://github.com/cal-cs184-student/hw2-alexdils">
+      github.com/cal-cs184-student/hw2-alexdils</a></p><h1>Task 1</h1><p>
+     I implemented one step of de Casteljau evaluation by linearly interpolating each adjacent pair of control points. For each evaluation, I keep the same parameter \(t \in [0,1]\) at every level.&nbsp;I used the following interpolation rule:
+    </p>
+    <div class="equation">
+     \[\mathbf{b}_i^{k+1} = (1-t)\,\mathbf{b}_i^k + t\,\mathbf{b}_{i+1}^k\]
+    </div>
+    <p>
+     In
+     <code>
+      evaluateStep
+     </code>
+     , I loop through adjacent pairs, calculate their interpolated positions, and append each result to a new vector. I return this vector so the viewer can repeat the operation.
+    </p>
+    <p>
+     To demo, I created a curve with six control points in
+     <code>
+      bzc/curve6.bzc
+     </code>
+     . I used (0.12, 0.24), (0.25, 0.82), (0.48, 0.10), (0.70, 0.90), (0.94, 0.25), and (1.16, 0.62). I captured every evaluation level at \(t = 0.5\), with the complete curve shown in green. The wider-than-square viewer permits the last x coordinate to exceed 1.
+    </p>
+    <div class="grid cols-2">
+     <figure>
+      <img alt="Level 0: six original control points; completed curve in green." src="assets/curve-level-0.png">
+      <figcaption>
+       Level 0: six original control points; completed curve in green.
+      </figcaption>
+     </figure>
+     <figure>
+      <img alt="Level 1: five interpolated points in blue, t = 0.5." src="assets/curve-level-1.png">
+      <figcaption>
+       Level 1: five interpolated points in blue, \(t = 0.5\).</figcaption></figure></div>
+    <div class="grid cols-2">
+     <figure>
+      <img alt="Level 2: four points." src="assets/curve-level-2.png">
+      <figcaption>
+       Level 2: four points.
+      </figcaption>
+     </figure>
+     <figure>
+      <img alt="Level 3: three points." src="assets/curve-level-3.png">
+      <figcaption>
+       Level 3: three points.
+      </figcaption>
+     </figure>
+     <figure>
+      <img alt="Level 4: two points." src="assets/curve-level-4.png">
+      <figcaption>
+       Level 4: two points.
+      </figcaption>
+     </figure>
+     <figure>
+      <img alt="Level 5: one evaluated point, shown in red." src="assets/curve-level-5.png">
+      <figcaption>
+       Level 5: one evaluated point, shown in red.
+      </figcaption>
+     </figure>
+    </div>
+    <p>
+     I then moved the third control point from (0.48, 0.10) to (0.48, 0.32) and the fourth from (0.70, 0.90) to (0.70, 0.75). I used the scroll control to change \(t\) from \(0.5\) to \(0.7\). I observed that moving the control points changed the shape of the curve, while changing \(t\) moved the evaluated point along it.
+    </p>
+    <div class="medium curve">
+     <figure>
+      <img alt="Modified control polygon and t = 0.7; all five evaluation levels are visible." src="assets/curve-modified.png">
+      <figcaption>\(t = 0.7\)</figcaption>
+     </figure>
+    </div>
+   </section>
+  </main>
 
-			body {
-				font-family: 'Inter', sans-serif;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-		<h1>CS184/284A Fall 2026 Homework 2 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
 
-		<br>
-
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/fa26">cs184.eecs.berkeley.edu/fa26</a>
-
-		<br>
-		
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/fa26">cs184.eecs.berkeley.edu/fa26</a>
-
-		<figure>
-			<img src="assets/teapot.png" alt="Teapot" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
-		<!--
-		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
-
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
-
-		<h2>Section I: Bezier Curves and Surfaces</h2>
-
-		<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="assets/teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="assets/teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="assets/teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="assets/teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
-
-		<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
-
-		<h3>Part 3: Area-weighted vertex normals</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h3>Part 4: Edge flip</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h3>Part 5: Edge split</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
-		</div>
-	</body>
-</html>
+</body></html>
