@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width,initial-scale=1" name="viewport">
   <title>
-   CS184 Homework 2 Task 1 - Alex Dils
+   CS184 Homework 2 - Alex Dils
   </title>
   <style>
    *{box-sizing:border-box}
@@ -154,8 +154,30 @@ h2,h3{break-after:avoid}
       <figcaption>\(t = 0.7\)</figcaption>
      </figure>
     </div>
+
+    <h1>Task 2</h1>
+    <p>
+     I extended de Casteljau evaluation to Bezier surfaces by applying the same interpolation to 3D control points in two stages. I first evaluate each row of the control-point grid at \(u\). I then use those resulting points as the control points of the moving Bezier curve shown in lecture and evaluate it at \(v\). This gives one point on the surface at \((u,v)\):
+    </p>
+    <div class="equation">
+     \[\begin{aligned}
+     \mathbf{q}_i(u) &amp;= \operatorname{deCasteljau}(\mathbf{P}_{i0},\ldots,\mathbf{P}_{i,n-1};u),\\
+     \mathbf{P}(u,v) &amp;= \operatorname{deCasteljau}(\mathbf{q}_0(u),\ldots,\mathbf{q}_{n-1}(u);v).
+     \end{aligned}\]
+    </div>
+    <p>
+     In <code>evaluateStep</code>, I interpolate adjacent <code>Vector3D</code> points using the supplied parameter. In <code>evaluate1D</code>, I copy the input points and repeat this step until only one point remains. In <code>evaluate</code>, I call <code>evaluate1D</code> on every row with \(u\), collect the results in a vector, and call it once more on that vector with \(v\). I keep the original control points unchanged.
+    </p>
+    <p>
+     I evaluated the patches in <code>bez/teapot.bez</code> with this implementation:
+    </p>
+    <figure>
+     <img src="assets/teapot-bezier.png" alt="Teapot evaluated from Bezier patches, with triangle edges visible.">
+     <figcaption>Teapot from <code>bez/teapot.bez</code></figcaption>
+    </figure>
    </section>
   </main>
+
 
 
 </body></html>
