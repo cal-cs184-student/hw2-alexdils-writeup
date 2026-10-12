@@ -192,17 +192,44 @@ h2,h3{break-after:avoid}
       </p>
 <div class="grid cols-2">
 <figure>
-<img alt="Teapot with flat shading, showing individual triangles." src="assets/teapot-flat.png"/>
+<img alt="Teapot with flat shading, showing individual triangles." src="assets/teapot-flat.png">
 <figcaption>Flat shading.</figcaption>
 </figure>
 <figure>
-<img alt="Same teapot with area-weighted vertex normals and smooth shading." src="assets/teapot-smooth.png"/>
+<img alt="Same teapot with area-weighted vertex normals and smooth shading." src="assets/teapot-smooth.png">
 <figcaption>Area-weighted vertex normals.</figcaption>
 </figure>
 </div>
 
+
+<h1>Task 4</h1>
+<p>
+ I implemented an edge flip by replacing the shared diagonal of two adjacent triangles with the diagonal between their opposite vertices. In my code, I label the original endpoints \(a,b\) and the opposite vertices \(c,d\). The two triangles change as follows:
+</p>
+<div class="equation">
+ \[(a,b,c),\ (b,a,d)\quad\longrightarrow\quad(c,d,b),\ (d,c,a).\]
+</div>
+<p>
+ I first save the six halfedges, four vertices, and two faces around the edge. I reuse the two halfedges of the original diagonal for the new edge \((c,d)\), then use <code>setNeighbors</code> to assign the next, twin, vertex, edge, and face pointers of all six halfedges. I also update the representative halfedges of the four vertices, the flipped edge, and the two faces. The surrounding edges keep their existing twins and edge objects.
+</p>
+<p>Then, I return the original edge immediately if it is a boundary edge. For an interior edge, I only reassign pointers in this local neighborhood, so the operation takes constant time and does not create or delete vertices, edges, faces, or halfedges. I return the same edge iterator, which now represents the new diagonal.
+</p>
+<p>
+ To check my pointer assignments, I verified that each face forms a three-halfedge cycle, twins point back to each other, and traversing a vertex's outgoing halfedges visits all of its incident edges. I flipped the same edge 100 times, checked that boundary flips leave the pointers unchanged, and tested 300 flips on the teapot while checking connectivity, element counts, and vertex positions after each flip</p>
+<div class="grid cols-2">
+ <figure>
+  <img src="assets/teapot-before.png" alt="Teapot with its original triangle edges before flipping.">
+  <figcaption>Before edge flips.</figcaption>
+ </figure>
+ <figure>
+  <img src="assets/teapot-flipped.png" alt="Same teapot after 12 interior edge flips on its body.">
+  <figcaption>After 12 edge flipps.</figcaption>
+ </figure>
+</div>
+
    </section>
   </main>
+
 
 
 
