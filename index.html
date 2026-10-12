@@ -88,7 +88,15 @@ h2,h3{break-after:avoid}
      <br>
      Code repository:
      <a href="https://github.com/cal-cs184-student/hw2-alexdils">
-      github.com/cal-cs184-student/hw2-alexdils</a></p><h1>Task 1</h1><p>
+      github.com/cal-cs184-student/hw2-alexdils</a></p>
+    <h1>Overview</h1>
+    <p>
+     In this assignment, I worked with Bezier curves, Bezier surfaces, and triangle meshes. I used de Casteljau's algorithm to evaluate curves and extended it to surfaces by interpolating in two directions. I then implemented area-weighted vertex normals, edge flips, edge splits, and Loop subdivision using the halfedge data structure. For the task 6's extra credit, I also added subdivision for meshes with boundaries.
+    </p>
+    <p>
+     I learned how vertex positions and mesh connectivity affect the final surface. Vertex normals made the teapot's shading smoother, while subdivision changed its geometry and silhouette. Also, the cube experiment showed me that a symmetric shape can become asymmetric when its triangulation isnt consistant with the desired shape's symetry. I also learned why I need to calculate subdivision positions before changing the mesh and keep the halfedge links consistent through every split and flip.
+    </p>
+    <h1>Task 1</h1><p>
      I implemented one step of de Casteljau evaluation by linearly interpolating each adjacent pair of control points. For each evaluation, I keep the same parameter \(t \in [0,1]\) at every level.&nbsp;I used the following interpolation rule:
     </p>
     <div class="equation">
@@ -331,6 +339,7 @@ h2,h3{break-after:avoid}
 
    </section>
   </main>
+
 
 
 
