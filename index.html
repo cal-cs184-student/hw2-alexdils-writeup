@@ -10,7 +10,7 @@
 body{margin:0;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5}
 .report{max-width:980px;margin:auto;padding:32px}
 .page{background:white;padding:42px 48px;margin:0 0 28px}
-h1{font-size:34px;line-height:1.15;margin:5px 0 10px;color:#000}
+h1{font-size:34px;line-height:1.15;margin:5px 0 10px;color:#00}
 h2{font-size:22px;color:#000;margin:22px 0 9px}
 h3{font-size:19px;color:#000;margin:18px 0 8px}
 p{margin:9px 0 12px}
@@ -260,18 +260,73 @@ h2,h3{break-after:avoid}
   <figcaption>After 16 edge splits and eight edge flips.</figcaption>
  </figure>
 </div>
+
+
+<h1>Task 6</h1>
 <p>
- I also implemented boundary edge splits. I orient the selected halfedge toward the real triangle, add the midpoint, and split only that triangle into two. I reuse the existing boundary halfedge for one half of the boundary edge and insert the other half immediately after it in the virtual boundary face's loop. This avoids searching for the preceding boundary halfedge. A boundary split adds one vertex, two edges, one face, and four halfedges. I checked both possible orientations of the selected edge's representative halfedge and verified that the boundary loop stays closed.
+ I implemented Loop subdivision using the weights and split-then-flip sequence. I first calculate all updated positions from the original mesh. For an interior vertex with \(n\) neighbors, I use
+</p>
+<div class="equation">
+ \[\mathbf{p}'=(1-nu)\mathbf{p}+u\sum_{i=1}^{n}\mathbf{p}_i,\qquad
+ u=\begin{cases}\frac{3}{16},&amp;n=3,\\\frac{3}{8n},&amp;n\ne3.\end{cases}\]
+</div>
+<p>
+ For an interior edge with endpoints \(\mathbf{a},\mathbf{b}\) and opposite vertices \(\mathbf{c},\mathbf{d}\), I calculate the inserted vertex as
+</p>
+<div class="equation">
+ \[\mathbf{m}'=\frac{3}{8}(\mathbf{a}+\mathbf{b})+\frac{1}{8}(\mathbf{c}+\mathbf{d}).\]
+</div>
+<p>
+ I store the updated old-vertex positions in <code>Vertex::newPosition</code> and the edge-point positions in <code>Edge::newPosition</code>. I keep <code>position</code> unchanged while calculating these values. I save the original edges in a vector so I split each one exactly once, even as the mesh gains edges. I transfer each saved edge-point position to its new vertex, then flip only edges marked new that connect one old vertex and one new vertex. I keep both halves of each original edge marked old. Finally, I copy every vertex's <code>newPosition</code> into <code>position</code>.
+</p>
+<p>
+ I checked the old-vertex and edge-point weights independently on the cube, teapot, a degree-three tetrahedron, and an open square. I also checked halfedge twins, triangle cycles, vertex traversal, and the counts \(V'=V+E\), \(E'=2E+3F\), and \(F'=4F\) after repeated subdivision.</p>
+<div class="grid cols-3">
+ <figure><img src="assets/teapot-loop-0.png" alt="Original teapot triangle mesh."><figcaption>Og teapot.</figcaption></figure>
+ <figure><img src="assets/teapot-loop-1.png" alt="Teapot after one Loop subdivision."><figcaption>One subdivision.</figcaption></figure>
+ <figure><img src="assets/teapot-loop-2.png" alt="Teapot after two Loop subdivisions."><figcaption>Two subdivisions.</figcaption></figure>
+</div>
+<p>
+ I can see the teapot's triangles become smaller and its silhouette become smoother after each subdivision. On the cube, the sharp corners and edges round off and the surface shrinks toward a smooth shape.</p>
+<div class="grid cols-2">
+ <figure><img src="assets/cube-loop-0.png" alt="Original triangulated cube."><figcaption>Original cube: 8 vertices, 12 triangles.</figcaption></figure>
+ <figure><img src="assets/cube-loop-1.png" alt="Cube after one Loop subdivision."><figcaption>One subdivision: 26 vertices, 48 triangles.</figcaption></figure>
+ <figure><img src="assets/cube-loop-2.png" alt="Cube after two Loop subdivisions."><figcaption>Two subdivisions: 98 vertices, 192 triangles.</figcaption></figure>
+ <figure><img src="assets/cube-loop-3.png" alt="Cube after three Loop subdivisions, showing uneven rounding."><figcaption>Three subdivisions: 386 vertices, 768 triangles.</figcaption></figure>
+</div>
+<p>
+ I observed that the original cube becomes asymmetric. Each square face has a diagonal, and those diagonals give the corners different neighbor sets and degrees. The old-vertex weights depend on those degrees, and the new-edge weights depend on the opposite vertices. I think this is because the subdivision doesn't maintain the same symetry as the geometric cube.</p>
+<p>
+ I made the cube subdivide symmetrically by splitting the diagonal on each of its six square faces. This puts a vertex at each face center and replaces each pair of triangles with a four-triangle fan. The preprocessed cube has 14 vertices and 24 triangles, and corresponding corners now have matching neighborhoods under the cube's rotations.
 </p>
 <div class="grid cols-2">
- <figure>
-  <img src="assets/boundary-before.png" alt="Open square mesh with two triangles before boundary edge splits.">
-  <figcaption>Before boundary splits: two triangles.</figcaption>
- </figure>
- <figure>
-  <img src="assets/boundary-split.png" alt="Open square mesh after splitting each of its four original boundary edges.">
-  <figcaption>After splitting all four boundary edges: six triangles.</figcaption>
- </figure>
+ <figure><img src="assets/cube-symmetric-0.png" alt="Cube preprocessed with a center vertex on each square face."><figcaption>Preprocessed cube: 14 vertices, 24 triangles.</figcaption></figure>
+ <figure><img src="assets/cube-symmetric-1.png" alt="Symmetric cube after one Loop subdivision."><figcaption>One subdivision: 50 vertices, 96 triangles.</figcaption></figure>
+ <figure><img src="assets/cube-symmetric-2.png" alt="Symmetric cube after two Loop subdivisions."><figcaption>Two subdivisions: 194 vertices, 384 triangles.</figcaption></figure>
+ <figure><img src="assets/cube-symmetric-3.png" alt="Symmetric cube after three Loop subdivisions."><figcaption>Three subdivisions: 770 vertices, 1,536 triangles.</figcaption></figure></div>
+<p>
+ I also tried reducing the loss of sharp features by subdividing every triangle once using midpoint splits and the same flips, without moving the old vertices. This adds vertices along the original edges before applying the smoothing weights. After two Loop iterations, I see broader flat regions and less shrinkage than in the cube subdivided directly.</p>
+<div class="grid cols-2">
+ <figure><img src="assets/cube-presplit.png" alt="Cube after midpoint subdivision without moving its original corners."><figcaption>Midpoint preprocessing, before smoothing.</figcaption></figure>
+ <figure><img src="assets/cube-presplit-loop-2.png" alt="Pre-split cube after two Loop iterations, with broader flat regions."><figcaption>Preprocessed cube after two Loop subdivisions.</figcaption></figure>
+</div>
+<h2>Task 6 Extra Credit: Boundary Meshes</h2>
+<p>
+ I implemented subdivision for meshes with boundaries inside <code>MeshResampler::upsample</code>. For a boundary vertex, I use only its two neighbors along the boundary. For a boundary edge, I insert its midpoint. I use the following boundary rules, also described in <a href="https://www.pbr-book.org/3ed-2018/Shapes/Subdivision_Surfaces">Physically Based Rendering</a>:
+</p>
+<div class="equation">
+ \[\mathbf{p}'=\frac{3}{4}\mathbf{p}+\frac{1}{8}(\mathbf{p}_{\mathrm{left}}+\mathbf{p}_{\mathrm{right}}),\qquad
+ \mathbf{m}'=\frac{1}{2}(\mathbf{a}+\mathbf{b}).\]
+</div>
+<p>
+ I use a boundary-splitting helper within Task 6 to split the one real triangle adjacent to a boundary edge and insert the new halfedge into the virtual boundary loop. I update the representative halfedges and mark the two halves of the original boundary edge as old.</p>
+<p>
+ I tested an open square made of two triangles. It has eight triangles after one subdivision and 32 after two. I also tested three successive subdivisions of a single open triangle and checked both boundary weights and connectivity.
+</p>
+<div class="grid cols-3">
+ <figure><img src="assets/boundary-before.png" alt="Open square with two original triangles."><figcaption>Original open square...two triangles.</figcaption></figure>
+ <figure><img src="assets/boundary-loop-1.png" alt="Open square after one boundary-aware Loop subdivision."><figcaption>One subdivision...eight triangles.</figcaption></figure>
+ <figure><img src="assets/boundary-loop-2.png" alt="Open square after two boundary-aware Loop subdivisions."><figcaption>Two subdivision...32 triangles.</figcaption></figure>
 </div>
 
    </section>
