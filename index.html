@@ -175,6 +175,32 @@ h2,h3{break-after:avoid}
      <img src="assets/teapot-bezier.png" alt="Teapot evaluated from Bezier patches, with triangle edges visible.">
      <figcaption>Teapot from <code>bez/teapot.bez</code></figcaption>
     </figure>
+
+<h1>Task 3</h1>
+<p>
+        I calculate a vertex normal by combining the normals of all triangles incident to that vertex, weighted by their areas. I start from the vertex's outgoing halfedge and use <code>twin()-&gt;next()</code> to move around the vertex. For each triangle, I take the cross product of the two edge vectors that start at the vertex:
+      </p>
+<div class="equation">
+        \[\mathbf{c}_f=(\mathbf{p}_1-\mathbf{p}_0)\times(\mathbf{p}_2-\mathbf{p}_0),\qquad
+        \mathbf{n}_v=\frac{\sum_{f\ni v}\mathbf{c}_f}{\left\|\sum_{f\ni v}\mathbf{c}_f\right\|}.\]
+      </div>
+<p>
+        I leave each cross product unnormalized before adding it to the sum. Its magnitude is twice the triangle's area, so larger triangles contribute more to the final direction. I normalize the sum once at the end. I use <code>HalfedgeCIter</code> because <code>Vertex::normal()</code> is a const function, and I skip virtual boundary faces. If the sum is zero, I return a zero vector.
+      </p>
+<p>
+        I compared <code>dae/teapot.dae</code> with flat shading and with area-weighted vertex normals. With flat shading, I can see the individual triangles across the body and lid. With vertex normals, the lighting changes smoothly across those surfaces. I used <code>Q</code> to toggle between the two shading modes.
+      </p>
+<div class="grid cols-2">
+<figure>
+<img alt="Teapot with flat shading, showing individual triangles." src="assets/teapot-flat.png"/>
+<figcaption>Flat shading.</figcaption>
+</figure>
+<figure>
+<img alt="Same teapot with area-weighted vertex normals and smooth shading." src="assets/teapot-smooth.png"/>
+<figcaption>Area-weighted vertex normals.</figcaption>
+</figure>
+</div>
+
    </section>
   </main>
 
