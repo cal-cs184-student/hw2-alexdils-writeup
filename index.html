@@ -227,6 +227,53 @@ h2,h3{break-after:avoid}
  </figure>
 </div>
 
+
+<h1>Task 5</h1>
+<p>
+ I implemented an edge split by inserting a vertex at the midpoint of the selected edge and connecting it to the opposite vertex of each neighboring triangle. Using the same labels as my edge flip, I split the edge \((a,b)\) and place the new vertex at
+</p>
+<div class="equation">
+ \[\mathbf{m}=\frac{\mathbf{a}+\mathbf{b}}{2}.\]
+</div>
+<p>
+ For an interior edge, the two triangles become four: \((a,m,c)\), \((m,b,c)\), \((m,a,d)\), and \((m,d,b)\). I save the original neighborhood before changing its links, reuse the original edge for one half of the split edge, and add one vertex, three edges, two faces, and six halfedges. I assign the next, twin, vertex, edge, and face pointers with <code>setNeighbors</code>, then update the representative halfedges. I return the new vertex with its halfedge pointing along one half of the original edge. This uses a fixed number of local operations, so the split takes constant time.
+</p>
+<p>
+ I mark the midpoint vertex as new and the two edges connecting it to the opposite vertices as new. I mark both halves of the original edge as old so I can distinguish these edges when implementing subdivision. To check the pointer assignments, I verified the four resulting triangles, the exact element counts, the midpoint position, and the vertex and face traversal cycles. I also tested nearby splits and flips together: 60 splits and 91 flips on the cube, and 60 splits and 120 flips on the teapot, with connectivity checks after each operation.
+</p>
+<div class="grid cols-2">
+ <figure>
+  <img src="assets/teapot-split-before.png" alt="Teapot with its original triangle mesh before edge splits.">
+  <figcaption>Before edge splits.</figcaption>
+ </figure>
+ <figure>
+  <img src="assets/teapot-split.png" alt="Same teapot after 16 interior edge splits on its body.">
+  <figcaption>After 16 edge splits.</figcaption>
+ </figure>
+</div>
+<p>
+ I then flipped eight of the new interior edges in the split mesh. Compared with the original mesh above, the result has the added midpoint vertices and a different arrangement of diagonals. The surface stays connected through both operations.
+</p>
+<div class="medium">
+ <figure>
+  <img src="assets/teapot-mixed.png" alt="Teapot after 16 edge splits followed by eight edge flips.">
+  <figcaption>After 16 edge splits and eight edge flips.</figcaption>
+ </figure>
+</div>
+<p>
+ I also implemented boundary edge splits. I orient the selected halfedge toward the real triangle, add the midpoint, and split only that triangle into two. I reuse the existing boundary halfedge for one half of the boundary edge and insert the other half immediately after it in the virtual boundary face's loop. This avoids searching for the preceding boundary halfedge. A boundary split adds one vertex, two edges, one face, and four halfedges. I checked both possible orientations of the selected edge's representative halfedge and verified that the boundary loop stays closed.
+</p>
+<div class="grid cols-2">
+ <figure>
+  <img src="assets/boundary-before.png" alt="Open square mesh with two triangles before boundary edge splits.">
+  <figcaption>Before boundary splits: two triangles.</figcaption>
+ </figure>
+ <figure>
+  <img src="assets/boundary-split.png" alt="Open square mesh after splitting each of its four original boundary edges.">
+  <figcaption>After splitting all four boundary edges: six triangles.</figcaption>
+ </figure>
+</div>
+
    </section>
   </main>
 
